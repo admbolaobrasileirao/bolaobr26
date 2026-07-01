@@ -1,4 +1,5 @@
 import { auth, db, adminEmail } from './firebase-config.js';
+import { SQUADS } from './data/squads.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
 import {
   collection,
@@ -17,6 +18,23 @@ const scores = (value) => `
     ${Array.from({ length: 10 }, (_, n) => `<option ${n === value ? 'selected' : ''}>${n}</option>`).join('')}
   </select>
 `;
+
+const playerOptions = (team, selectedPlayer) => {
+  const squad = SQUADS[team] || [];
+  return `
+    <option value="">${team ? '⚽ Atleta do 1º gol' : 'Escolha o time primeiro'}</option>
+    ${squad.map((player) => `<option ${player === selectedPlayer ? 'selected' : ''}>${player}</option>`).join('')}
+  `;
+};
+
+function syncPlayerSelect(row, selectedPlayer = '') {
+  const teamSelect = row.querySelector('.team');
+  const playerSelect = row.querySelector('.player');
+  const team = teamSelect.value;
+
+  playerSelect.disabled = !team;
+  playerSelect.innerHTML = playerOptions(team, selectedPlayer);
+}
 
 async function load(round) {
   list.textContent = 'Carregando jogos...';
@@ -49,13 +67,16 @@ async function load(round) {
           <option ${result.firstGoalTeam === game.home ? 'selected' : ''}>${game.home}</option>
           <option ${result.firstGoalTeam === game.away ? 'selected' : ''}>${game.away}</option>
         </select>
-        <input placeholder="Jogador do 1º gol" value="${result.firstGoalPlayer || ''}">
+        <select class="player"></select>
         <button class="save">SALVAR</button>
       `;
 
+      syncPlayerSelect(row, result.firstGoalPlayer || '');
+
+      row.querySelector('.team').onchange = () => syncPlayerSelect(row);
+
       row.querySelector('.save').onclick = async () => {
         const selects = row.querySelectorAll('select');
-        const player = row.querySelector('input').value.trim();
         const button = row.querySelector('.save');
 
         button.textContent = 'SALVANDO...';
@@ -66,7 +87,7 @@ async function load(round) {
               homeGoals: +selects[0].value,
               awayGoals: +selects[1].value,
               firstGoalTeam: selects[2].value || null,
-              firstGoalPlayer: player || null,
+              firstGoalPlayer: selects[3].value || null,
             },
           });
           button.textContent = 'SALVO ✓';
