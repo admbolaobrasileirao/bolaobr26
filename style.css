@@ -1,0 +1,23 @@
+:root { --navy: #111e35; --card: #172640; --gold: #dfbb32; --gold-hover: #edca43; --ink: #071222; --muted: #a7bdd9; --white: #f8fafc; --line: rgba(183, 205, 237, .16); }
+* { box-sizing: border-box; }
+body { min-width: 320px; min-height: 100vh; margin: 0; color: var(--white); font-family: "Archivo Black", Arial, sans-serif; background: radial-gradient(circle at 50% -10%, #263b5c 0, var(--navy) 43%, #0d172a 100%); }
+.page-shell { min-height: 100vh; display: grid; place-items: center; padding: 28px 16px; }
+.access-card { width: min(100%, 650px); padding: 48px 56px 44px; border: 1px solid var(--line); border-radius: 28px; background: rgba(23, 38, 64, .94); box-shadow: 0 26px 60px rgba(0, 0, 0, .28); }
+.championship-image { display: block; width: 100%; max-height: 325px; object-fit: cover; border: 1px solid rgba(255, 255, 255, .12); border-radius: 22px; }
+h1 { margin: 30px 0 27px; color: var(--white); font-family: "Bungee Inline", Arial, sans-serif; font-size: clamp(1.5rem, 4.8vw, 2.4rem); font-weight: 400; letter-spacing: .015em; line-height: 1.1; text-align: center; }
+.access-tabs { display: flex; gap: 10px; margin-bottom: 26px; }
+.tab { min-height: 50px; padding: 0 22px; border: 1px solid #31435f; border-radius: 999px; color: var(--white); font: 700 .86rem "Archivo Black", Arial, sans-serif; cursor: pointer; background: transparent; }
+.tab.is-active { border-color: var(--gold); color: var(--ink); background: var(--gold); }
+.access-form { display: grid; gap: 10px; }
+.access-form.is-hidden { display: none; }
+label, .field-label { margin-top: 3px; font-size: 1.04rem; font-weight: 800; }
+select, .access-form > input { width: 100%; min-height: 56px; padding: 0 16px; border: 2px solid transparent; border-radius: 13px; outline: none; color: var(--ink); font: 400 .85rem "Archivo Black", Arial, sans-serif; background: #e9edf3; }
+select:focus, .access-form > input:focus { border-color: var(--gold); }
+.pin-area { display: grid; gap: 10px; margin-top: 10px; }
+.pin-boxes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.pin-input { width: 100%; aspect-ratio: 1; max-height: 65px; border: 2px solid transparent; border-radius: 13px; outline: none; color: var(--ink); font: 400 1.45rem "Archivo Black", Arial, sans-serif; text-align: center; background: #e9edf3; caret-color: var(--gold); }
+.pin-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(223, 187, 50, .18); }
+.form-note { margin: 0 0 18px; color: var(--muted); font-family: Arial, sans-serif; font-size: .95rem; line-height: 1.5; }
+.primary-button { width: 100%; min-height: 56px; margin-top: 4px; border: 0; border-radius: 13px; color: var(--ink); font: 400 .9rem "Archivo Black", Arial, sans-serif; cursor: pointer; background: var(--gold); transition: transform .15s, background .15s; }
+.primary-button:hover { background: var(--gold-hover); transform: translateY(-1px); }
+@media (max-width: 520px) { .page-shell { align-items: start; padding: 14px 12px; } .access-card { padding: 25px 20px 28px; border-radius: 22px; } .championship-image { max-height: 225px; border-radius: 17px; } h1 { margin: 25px 0 21px; } .tab { flex: 1; padding: 0 12px; } .pin-boxes { gap: 9px; } }

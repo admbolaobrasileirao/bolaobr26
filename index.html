@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bolão 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bungee+Inline&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="access-card" aria-labelledby="page-title">
+        <img class="championship-image" src="assets/brasileirao-2026.png" alt="Taça do Brasileirão em um estádio" />
+
+        <h1 id="page-title">BOLÃO 2026</h1>
+
+        <div class="access-tabs" role="tablist" aria-label="Tipo de acesso">
+          <button class="tab is-active" id="participant-tab" type="button" role="tab" aria-selected="true" aria-controls="participant-panel">Participante</button>
+          <button class="tab" id="admin-tab" type="button" role="tab" aria-selected="false" aria-controls="admin-panel">Admin</button>
+        </div>
+
+        <form id="participant-panel" class="access-form" role="tabpanel" aria-labelledby="participant-tab" action="home.html">
+          <label for="participant">Seu nome</label>
+          <select id="participant" required>
+            <option value="" selected disabled>Selecione...</option>
+            <option>Ana</option><option>Bruno</option><option>Camila</option><option>Diego</option>
+            <option>Eduarda</option><option>Felipe</option><option>Gabriel</option><option>Helena</option>
+            <option>Igor</option><option>João</option><option>Larissa</option><option>Marcos</option>
+            <option>Natalia</option><option>Otávio</option><option>Paula</option><option>Rafael</option><option>Vitória</option>
+          </select>
+
+          <div class="pin-area">
+            <span class="field-label">Crie seu PIN</span>
+            <div class="pin-boxes" aria-label="PIN de quatro dígitos">
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" aria-label="Primeiro dígito do PIN" />
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Segundo dígito do PIN" />
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Terceiro dígito do PIN" />
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Quarto dígito do PIN" />
+            </div>
+          </div>
+
+          <div class="pin-area">
+            <span class="field-label">Confirmar PIN</span>
+            <div class="pin-boxes" aria-label="Confirmação do PIN">
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Primeiro dígito da confirmação" />
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Segundo dígito da confirmação" />
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Terceiro dígito da confirmação" />
+              <input class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Quarto dígito da confirmação" />
+            </div>
+          </div>
+
+          <p class="form-note">Primeiro acesso: crie seu PIN. Nos próximos, só o PIN.</p>
+          <button class="primary-button" type="submit">ENTRAR</button>
+        </form>
+
+        <form id="admin-panel" class="access-form is-hidden" role="tabpanel" aria-labelledby="admin-tab" action="admin.html">
+          <label for="admin-name">Usuário administrador</label>
+          <input id="admin-name" type="text" placeholder="Digite seu usuário" autocomplete="username" />
+          <label for="admin-password">Senha</label>
+          <input id="admin-password" type="password" placeholder="Digite sua senha" autocomplete="current-password" />
+          <button class="primary-button" type="submit">ENTRAR COMO ADMIN</button>
+        </form>
+      </section>
+    </main>
+    <script src="script.js"></script>
+    <script type="module" src="auth-admin.js"></script>
+  </body>
+</html>
