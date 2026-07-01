@@ -237,6 +237,11 @@ thead tr:nth-child(2) th {
   background: var(--gold);
 }
 
+.official-row td.pending-official {
+  color: var(--muted);
+  background: #1f304d;
+}
+
 .official-row .name-cell {
   color: #182235;
   background: var(--gold);

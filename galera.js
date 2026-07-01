@@ -11,7 +11,7 @@ const roundStatus = document.querySelector('#round-status');
 const rounds = Array.from({ length: 38 }, (_, index) => index + 1);
 
 roundSelect.innerHTML = rounds
-  .map((round) => `<option value="${round}" ${round === 19 ? 'selected' : ''}>Rodada ${String(round).padStart(2, '0')}</option>`)
+  .map((round) => `<option value="${round}">Rodada ${String(round).padStart(2, '0')}</option>`)
   .join('');
 
 function scoreText(homeGoals, awayGoals) {
@@ -55,6 +55,19 @@ async function getPredictions(round) {
   return map;
 }
 
+async function getFirstRoundWithResult() {
+  const snap = await getDocs(collection(db, 'games'));
+  const finishedRounds = new Set();
+
+  snap.forEach((item) => {
+    const game = item.data();
+    const hasResult = game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined;
+    if (hasResult) finishedRounds.add(game.round);
+  });
+
+  return [...finishedRounds].sort((a, b) => a - b)[0] || 1;
+}
+
 function renderClosedRound(round, participants, games, predictions) {
   const groups = games.map((game) => `
     <th colspan="2" class="game-heading">
@@ -68,9 +81,10 @@ function renderClosedRound(round, participants, games, predictions) {
 
   const official = games.map((game) => {
     const result = game.result || {};
+    const officialClass = result.homeGoals === undefined || result.awayGoals === undefined ? 'pending-official' : '';
     return `
-      <td>${scoreText(result.homeGoals, result.awayGoals)}</td>
-      <td class="goal">${shortPlayer(result.firstGoalPlayer)}</td>
+      <td class="${officialClass}">${scoreText(result.homeGoals, result.awayGoals)}</td>
+      <td class="goal ${officialClass}">${shortPlayer(result.firstGoalPlayer)}</td>
     `;
   }).join('');
 
@@ -106,9 +120,10 @@ function renderClosedRound(round, participants, games, predictions) {
     </tbody>
   `;
 
+  const finishedGames = games.filter((game) => game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined).length;
   matrixEyebrow.textContent = `PALPITES DA RODADA ${round}`;
   matrixTitle.textContent = 'Gabarito e palpites da galera';
-  roundMeta.textContent = `${games.length} jogos · ${participants.length} participantes`;
+  roundMeta.textContent = `${finishedGames}/${games.length} jogos com gabarito · ${participants.length} participantes`;
   roundStatus.textContent = '🔒 RODADA FECHADA';
 }
 
@@ -140,8 +155,9 @@ async function loadRound(round) {
     ]);
 
     const hasAnyResult = games.some((game) => game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined);
+    const hasAnyCorrection = [...predictions.values()].some((prediction) => prediction.correction?.corrected);
 
-    if (!hasAnyResult) {
+    if (!hasAnyResult && !hasAnyCorrection) {
       renderBlocked(round, participants, games);
       return;
     }
@@ -153,5 +169,19 @@ async function loadRound(round) {
   }
 }
 
+async function boot() {
+  table.innerHTML = '<tbody><tr><td class="blocked-message">Procurando rodada com gabarito...</td></tr></tbody>';
+
+  try {
+    const firstRound = await getFirstRoundWithResult();
+    roundSelect.value = String(firstRound);
+    await loadRound(firstRound);
+  } catch (error) {
+    console.error(error);
+    roundSelect.value = '1';
+    await loadRound(1);
+  }
+}
+
 roundSelect.addEventListener('change', (event) => loadRound(+event.target.value));
-loadRound(+roundSelect.value);
+boot();
