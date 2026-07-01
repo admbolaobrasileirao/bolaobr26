@@ -1,24 +1,63 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meus Palpites — Bolão 2026</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bungee+Inline&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="palpites.css" />
   </head>
   <body>
-    <header class="topbar"><a class="brand" href="home.html">BOLÃO <span>2026</span></a><button class="profile" type="button" aria-label="Abrir perfil">A</button></header>
+    <header class="topbar">
+      <a class="brand" href="home.html">BOLÃO <span>2026</span></a>
+      <button class="profile" id="profile" type="button" aria-label="Participante">?</button>
+    </header>
+
     <main class="page-content">
       <section class="prediction-header">
-        <div><h1>⚽ Meus Palpites</h1><span class="round-status">🔓 RODADA ABERTA</span></div>
-        <div class="mini-countdown"><p>Próximo fechamento</p><strong><span id="days">02</span>d <span id="hours">09</span>h <span id="minutes">44</span>m</strong><small>Rodada 3 · 24/06, 15:59</small></div>
+        <div>
+          <h1>⚽ Meus Palpites</h1>
+          <span id="round-status" class="round-status">🔓 RODADA ABERTA</span>
+        </div>
+        <div class="mini-countdown">
+          <p>Próximo fechamento</p>
+          <strong id="deadline-count">--</strong>
+          <small id="deadline-label">Defina a deadline no Admin</small>
+        </div>
       </section>
-      <section class="round-picker"><label for="round">Rodada</label><select id="round" aria-label="Selecionar rodada"></select><span>10 jogos</span></section>
-      <section class="games-section"><div class="games-title"><div><p class="eyebrow">RODADA 3</p><h2>Faça seus palpites</h2></div><p>Escolha o placar e o primeiro gol de cada partida.</p></div><div id="games" class="games-list"></div></section>
-      <button class="save-button" type="button">SALVAR PALPITES</button>
+
+      <section class="round-picker">
+        <label for="round">Rodada</label>
+        <select id="round" aria-label="Selecionar rodada"></select>
+        <span id="round-count">Carregando...</span>
+      </section>
+
+      <section class="games-section">
+        <div class="games-title">
+          <div>
+            <p id="round-eyebrow" class="eyebrow">RODADA</p>
+            <h2>Faça seus palpites</h2>
+          </div>
+          <p id="save-status">Escolha o placar e o primeiro gol de cada partida.</p>
+        </div>
+        <div id="games" class="games-list"></div>
+      </section>
+
+      <button class="save-button" id="save-predictions" type="button">SALVAR PALPITES</button>
     </main>
-    <footer class="bottom-nav" aria-label="Navegação principal"><a href="home.html">🏠<span>Home</span></a><a class="is-current" href="palpites.html">⚽<span>Palpites</span></a><a href="galera.html">👀<span>Galera</span></a><a href="ranking.html">🏆<span>Ranking</span></a><a href="classificacao.html">📊<span>Classificação</span></a><a href="resultados.html">🌎<span>Resultados</span></a></footer>
-    <script src="team-assets.js"></script><script src="palpites.js"></script>
+
+    <footer class="bottom-nav" aria-label="Navegação principal">
+      <a href="home.html">🏠<span>Home</span></a>
+      <a class="is-current" href="palpites.html">⚽<span>Palpites</span></a>
+      <a href="galera.html">👀<span>Galera</span></a>
+      <a href="ranking.html">🏆<span>Ranking</span></a>
+      <a href="classificacao.html">📊<span>Classificação</span></a>
+      <a href="resultados.html">🌎<span>Resultados</span></a>
+    </footer>
+
+    <script src="team-assets.js"></script>
+    <script type="module" src="palpites.js"></script>
   </body>
 </html>

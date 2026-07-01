@@ -5,6 +5,39 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.email == 'admbolaobrasileirao@gmail.com';
     }
 
+    match /participants/{participantId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        || request.resource.data.keys().hasOnly(['id', 'name', 'order', 'active', 'pin']);
+      allow delete: if isAdmin();
+    }
+
+    match /games/{gameId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /rounds/{roundId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /predictions/{predictionId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        || request.resource.data.keys().hasOnly([
+          'round',
+          'participant',
+          'game',
+          'homeGoals',
+          'awayGoals',
+          'firstGoalTeam',
+          'firstGoal',
+          'savedAt'
+        ]);
+      allow delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if isAdmin();
     }
