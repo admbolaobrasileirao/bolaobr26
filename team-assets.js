@@ -1,29 +1,29 @@
 const TEAM_ASSETS = {
-  'Atlético-MG': 'Atlético Mineiro.png',
-  Athletico: 'Athletico Paranaense.png',
+  'Atlético-MG': 'atletico-mg.png',
+  Athletico: 'athletico.png',
   Bahia: 'Bahia.png',
   Botafogo: 'Botafogo.png',
-  Bragantino: 'Red Bull Bragantino.png',
+  Bragantino: 'bragantino.png',
   Chapecoense: 'Chapecoense.png',
   Corinthians: 'Corinthians.png',
   Coritiba: 'Coritiba.png',
   Cruzeiro: 'Cruzeiro.png',
   Flamengo: 'Flamengo.png',
   Fluminense: 'Fluminense.png',
-  'Grêmio': 'Grêmio.png',
+  'Grêmio': 'gremio.png',
   Internacional: 'Internacional.png',
-  Mirassol: 'Mirassol-SP.png',
+  Mirassol: 'mirassol.png',
   Palmeiras: 'Palmeiras.png',
-  Remo: 'Remo (2).png',
+  Remo: 'remo.png',
   Santos: 'Santos.png',
-  'São Paulo': 'São Paulo.png',
-  Vasco: 'Vasco da Gama.png',
-  'Vitória': 'Vitória.png',
+  'São Paulo': 'sao-paulo.png',
+  Vasco: 'vasco.png',
+  'Vitória': 'vitoria.png',
 };
 
 function teamIcon(name) {
   const file = TEAM_ASSETS[name];
   return file
-    ? `<img class="team-icon" style="width:25px;height:25px;object-fit:contain;vertical-align:middle;margin:0 7px" src="assets/teams/${encodeURIComponent(file)}" alt="">`
+    ? `<img class="team-icon" style="width:25px;height:25px;object-fit:contain;vertical-align:middle;margin:0 7px" src="assets/teams/${file}" alt="">`
     : '';
 }

@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+import { collection, doc, getDoc, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
 
 const roundSelect = document.querySelector('#round');
 const table = document.querySelector('#prediction-table');
@@ -9,10 +9,7 @@ const matrixTitle = document.querySelector('#matrix-title');
 const roundStatus = document.querySelector('#round-status');
 
 const rounds = Array.from({ length: 38 }, (_, index) => index + 1);
-
-roundSelect.innerHTML = rounds
-  .map((round) => `<option value="${round}">Rodada ${String(round).padStart(2, '0')}</option>`)
-  .join('');
+roundSelect.innerHTML = rounds.map((round) => `<option value="${round}">Rodada ${String(round).padStart(2, '0')}</option>`).join('');
 
 function scoreText(homeGoals, awayGoals) {
   if (homeGoals === undefined || awayGoals === undefined || homeGoals === null || awayGoals === null) return '—';
@@ -55,20 +52,37 @@ async function getPredictions(round) {
   return map;
 }
 
-async function getFirstRoundWithResult() {
-  const snap = await getDocs(collection(db, 'games'));
-  const finishedRounds = new Set();
-
-  snap.forEach((item) => {
-    const game = item.data();
-    const hasResult = game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined;
-    if (hasResult) finishedRounds.add(game.round);
-  });
-
-  return [...finishedRounds].sort((a, b) => a - b)[0] || 1;
+async function getRound(round) {
+  const snap = await getDoc(doc(db, 'rounds', `r${round}`));
+  return snap.data() || {};
 }
 
-function renderClosedRound(round, participants, games, predictions) {
+function isDeadlineClosed(roundData) {
+  return !!roundData.deadline && new Date(roundData.deadline) <= new Date();
+}
+
+async function getFirstVisibleRound() {
+  const [gamesSnap, roundsSnap] = await Promise.all([getDocs(collection(db, 'games')), getDocs(collection(db, 'rounds'))]);
+  const visibleRounds = new Set();
+  const deadlineByRound = new Map();
+
+  roundsSnap.forEach((item) => {
+    const round = item.data();
+    if (round.number && isDeadlineClosed(round)) visibleRounds.add(round.number);
+    if (round.number) deadlineByRound.set(round.number, round.deadline);
+  });
+
+  gamesSnap.forEach((item) => {
+    const game = item.data();
+    const hasResult = game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined;
+    if (hasResult) visibleRounds.add(game.round);
+    if (deadlineByRound.get(game.round) && new Date(deadlineByRound.get(game.round)) <= new Date()) visibleRounds.add(game.round);
+  });
+
+  return [...visibleRounds].filter((round) => round >= 1 && round <= 38).sort((a, b) => a - b)[0] || 1;
+}
+
+function renderClosedRound(round, participants, games, predictions, roundData) {
   const groups = games.map((game) => `
     <th colspan="2" class="game-heading">
       <span>${teamIcon(game.home)}${game.home}</span>
@@ -78,66 +92,34 @@ function renderClosedRound(round, participants, games, predictions) {
   `).join('');
 
   const subheaders = games.map(() => '<th>PLACAR</th><th>⚽ 1º GOL</th>').join('');
-
   const official = games.map((game) => {
     const result = game.result || {};
     const officialClass = result.homeGoals === undefined || result.awayGoals === undefined ? 'pending-official' : '';
-    return `
-      <td class="${officialClass}">${scoreText(result.homeGoals, result.awayGoals)}</td>
-      <td class="goal ${officialClass}">${shortPlayer(result.firstGoalPlayer)}</td>
-    `;
+    return `<td class="${officialClass}">${scoreText(result.homeGoals, result.awayGoals)}</td><td class="goal ${officialClass}">${shortPlayer(result.firstGoalPlayer)}</td>`;
   }).join('');
 
   const rows = participants.map((participant) => {
     const cells = games.map((game) => {
       const prediction = predictions.get(`${participant.id}|${game.id}`);
-
-      if (!prediction) {
-        return '<td class="prediction muted">—</td><td class="prediction goal muted">—</td>';
-      }
-
+      if (!prediction) return '<td class="prediction muted">—</td><td class="prediction goal muted">—</td>';
       const correction = prediction.correction || {};
-      const scoreClass = statusClass(correction);
       const ball = correction.goalHit ? '<span class="ball" aria-label="Primeiro gol correto">⚽</span>' : '';
-
-      return `
-        <td class="prediction"><span class="score-badge ${scoreClass}">${scoreText(prediction.homeGoals, prediction.awayGoals)}</span></td>
-        <td class="prediction goal">${shortPlayer(prediction.firstGoal)}${ball}</td>
-      `;
+      return `<td class="prediction"><span class="score-badge ${statusClass(correction)}">${scoreText(prediction.homeGoals, prediction.awayGoals)}</span></td><td class="prediction goal">${shortPlayer(prediction.firstGoal)}${ball}</td>`;
     }).join('');
-
     return `<tr><th scope="row" class="name-cell">${participant.name}</th>${cells}</tr>`;
   }).join('');
 
-  table.innerHTML = `
-    <thead>
-      <tr><th rowspan="2" class="sticky-name">PARTICIPANTE</th>${groups}</tr>
-      <tr>${subheaders}</tr>
-    </thead>
-    <tbody>
-      <tr class="official-row"><th scope="row" class="name-cell">OFICIAL</th>${official}</tr>
-      ${rows}
-    </tbody>
-  `;
+  table.innerHTML = `<thead><tr><th rowspan="2" class="sticky-name">PARTICIPANTE</th>${groups}</tr><tr>${subheaders}</tr></thead><tbody><tr class="official-row"><th scope="row" class="name-cell">OFICIAL</th>${official}</tr>${rows}</tbody>`;
 
   const finishedGames = games.filter((game) => game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined).length;
   matrixEyebrow.textContent = `PALPITES DA RODADA ${round}`;
   matrixTitle.textContent = 'Gabarito e palpites da galera';
   roundMeta.textContent = `${finishedGames}/${games.length} jogos com gabarito · ${participants.length} participantes`;
-  roundStatus.textContent = '🔒 RODADA FECHADA';
+  roundStatus.textContent = isDeadlineClosed(roundData) ? '🔒 RODADA FECHADA' : '🟡 GABARITO LANÇADO';
 }
 
 function renderBlocked(round, participants, games) {
-  table.innerHTML = `
-    <tbody>
-      <tr>
-        <td class="blocked-message">
-          Palpites da Rodada ${String(round).padStart(2, '0')} ainda não liberados.
-          Eles aparecem aqui depois que pelo menos um gabarito da rodada for salvo no Admin.
-        </td>
-      </tr>
-    </tbody>
-  `;
+  table.innerHTML = `<tbody><tr><td class="blocked-message">Palpites da Rodada ${String(round).padStart(2, '0')} ainda não liberados. Eles aparecem aqui após o fechamento da rodada ou após o gabarito ser salvo.</td></tr></tbody>`;
   matrixEyebrow.textContent = `RODADA ${round}`;
   matrixTitle.textContent = 'Aguardando fechamento/gabarito';
   roundMeta.textContent = `${games.length} jogos · ${participants.length} participantes`;
@@ -146,23 +128,14 @@ function renderBlocked(round, participants, games) {
 
 async function loadRound(round) {
   table.innerHTML = '<tbody><tr><td class="blocked-message">Carregando palpites...</td></tr></tbody>';
-
   try {
-    const [participants, games, predictions] = await Promise.all([
-      getParticipants(),
-      getGames(round),
-      getPredictions(round),
-    ]);
-
+    const [participants, games, predictions, roundData] = await Promise.all([getParticipants(), getGames(round), getPredictions(round), getRound(round)]);
     const hasAnyResult = games.some((game) => game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined);
     const hasAnyCorrection = [...predictions.values()].some((prediction) => prediction.correction?.corrected);
+    const deadlineClosed = isDeadlineClosed(roundData);
 
-    if (!hasAnyResult && !hasAnyCorrection) {
-      renderBlocked(round, participants, games);
-      return;
-    }
-
-    renderClosedRound(round, participants, games, predictions);
+    if (!deadlineClosed && !hasAnyResult && !hasAnyCorrection) return renderBlocked(round, participants, games);
+    renderClosedRound(round, participants, games, predictions, roundData);
   } catch (error) {
     console.error(error);
     table.innerHTML = `<tbody><tr><td class="blocked-message">Erro ao carregar Galera: ${error.message}</td></tr></tbody>`;
@@ -170,17 +143,10 @@ async function loadRound(round) {
 }
 
 async function boot() {
-  table.innerHTML = '<tbody><tr><td class="blocked-message">Procurando rodada com gabarito...</td></tr></tbody>';
-
-  try {
-    const firstRound = await getFirstRoundWithResult();
-    roundSelect.value = String(firstRound);
-    await loadRound(firstRound);
-  } catch (error) {
-    console.error(error);
-    roundSelect.value = '1';
-    await loadRound(1);
-  }
+  table.innerHTML = '<tbody><tr><td class="blocked-message">Procurando rodada visível...</td></tr></tbody>';
+  const firstRound = await getFirstVisibleRound();
+  roundSelect.value = String(firstRound);
+  await loadRound(firstRound);
 }
 
 roundSelect.addEventListener('change', (event) => loadRound(+event.target.value));

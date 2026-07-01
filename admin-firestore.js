@@ -1,4 +1,5 @@
 import { auth, db, adminEmail } from './firebase-config.js';
+import { getSquads } from './squads-service.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
 import {
   collection,
@@ -14,12 +15,6 @@ import {
 
 let SQUADS = {};
 let currentGames = [];
-
-try {
-  ({ SQUADS } = await import('./squads.js'));
-} catch (error) {
-  console.error(error);
-}
 
 const resultList = document.querySelector('#result-list');
 const resultRound = document.querySelector('#result-round');
@@ -39,11 +34,14 @@ const squadTeam = document.querySelector('#squad-team');
 const squadPlayers = document.querySelector('#squad-players');
 const squadFeedback = document.querySelector('#squad-feedback');
 
-function fillRoundSelect(select, selected = 19) {
-  select.innerHTML = Array.from(
+function fillRoundSelect(select, selected = 19, includeExtras = false) {
+  select.innerHTML = [
+    ...Array.from(
     { length: 38 },
     (_, index) => `<option value="${index + 1}" ${index + 1 === selected ? 'selected' : ''}>Rodada ${String(index + 1).padStart(2, '0')}</option>`,
-  ).join('');
+    ),
+    includeExtras ? '<option value="extras">Extras / Atrasados</option>' : '',
+  ].join('');
 }
 
 document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => {
@@ -130,10 +128,13 @@ function readResult(row) {
 }
 
 async function getGames(round) {
-  const snap = await getDocs(query(collection(db, 'games'), where('round', '==', round)));
+  const q = round === 'extras'
+    ? query(collection(db, 'games'), where('extra', '==', true))
+    : query(collection(db, 'games'), where('round', '==', +round));
+  const snap = await getDocs(q);
   const games = [];
   snap.forEach((item) => games.push({ id: item.id, ...item.data() }));
-  return games.sort((a, b) => (a.order || 0) - (b.order || 0));
+  return games.sort((a, b) => (a.deadline || '').localeCompare(b.deadline || '') || (a.order || 0) - (b.order || 0));
 }
 
 async function getParticipants() {
@@ -202,7 +203,7 @@ async function saveRound() {
   } finally {
     button.disabled = false;
     button.textContent = 'SALVAR RODADA';
-    loadReminders(+reminderRound.value);
+    loadReminders(reminderRound.value);
   }
 }
 
@@ -297,7 +298,7 @@ async function loadReminders(round) {
   const [participants, games, predictionsSnap] = await Promise.all([
     getParticipants(),
     getGames(round),
-    getDocs(query(collection(db, 'predictions'), where('round', '==', round))),
+    getDocs(query(collection(db, 'predictions'), where('round', '==', round === 'extras' ? 99 : +round))),
   ]);
 
   const counts = new Map(participants.map((participant) => [participant.id, 0]));
@@ -462,18 +463,19 @@ function setupSquads() {
 }
 
 async function bootAdmin() {
-  fillRoundSelect(resultRound, 19);
-  fillRoundSelect(reminderRound, 19);
-  resultRound.onchange = () => loadResults(+resultRound.value);
-  reminderRound.onchange = () => loadReminders(+reminderRound.value);
+  SQUADS = await getSquads();
+  fillRoundSelect(resultRound, 19, true);
+  fillRoundSelect(reminderRound, 19, true);
+  resultRound.onchange = () => loadResults(resultRound.value);
+  reminderRound.onchange = () => loadReminders(reminderRound.value);
   document.querySelector('#save-deadlines').onclick = saveDeadlines;
   document.querySelector('#add-extra').onclick = addExtraGame;
   setupSquads();
 
   await Promise.all([
-    loadResults(+resultRound.value),
+    loadResults(resultRound.value),
     loadDeadlines(),
-    loadReminders(+reminderRound.value),
+    loadReminders(reminderRound.value),
     loadParticipants(),
     loadExtras(),
   ]);
