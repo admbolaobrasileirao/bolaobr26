@@ -1,5 +1,4 @@
 import { auth, db, adminEmail } from './firebase-config.js';
-import { SQUADS } from './data/squads.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
 import {
   collection,
@@ -9,6 +8,15 @@ import {
   updateDoc,
   where,
 } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+
+let SQUADS = {};
+let squadsLoadError = null;
+
+try {
+  ({ SQUADS } = await import('./data/squads.js'));
+} catch (error) {
+  squadsLoadError = error;
+}
 
 const panel = document.querySelector('#results');
 const list = document.querySelector('#result-list');
@@ -109,6 +117,12 @@ async function load(round) {
 onAuthStateChanged(auth, (user) => {
   if (!user || user.email !== adminEmail) {
     list.textContent = 'Entre como Admin pelo acesso principal antes de abrir esta página.';
+    return;
+  }
+
+  if (squadsLoadError) {
+    console.error(squadsLoadError);
+    list.textContent = 'Arquivo de elencos não encontrado. Confira se data/squads.js foi enviado para o GitHub dentro da pasta data.';
     return;
   }
 
