@@ -1,1 +1,109 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — Resultados</title><style>body{margin:0;padding:28px;background:#0e192c;color:#f8fafc;font-family:Arial}main{max-width:1200px;margin:auto;background:#172640;border:1px solid #2b3e5c;border-radius:18px;padding:24px}h1{margin:0 0 8px}p{color:#a9b7c6}select,input{height:42px;border:0;border-radius:9px;padding:0 10px}.game{display:grid;grid-template-columns:1fr 50px 18px 50px 1fr 1fr 1fr auto;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #2b3e5c}.save{border:0;border-radius:9px;padding:12px;background:#126235;color:#b9f0ca;font-weight:bold}@media(max-width:780px){.game{grid-template-columns:1fr 48px 18px 48px 1fr}.game select:nth-of-type(3),.game input,.save{grid-column:1/-1}}</style></head><body><main><h1>Resultados</h1><p>Selecione a rodada e registre o gabarito oficial de cada jogo.</p><section id="results"><h2>Rodada</h2><div id="result-list">Entre como Admin pelo acesso principal.</div></section></main><script type="module" src="admin-firestore.js"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin — Bolão 2026</title>
+    <style>
+      :root{--navy:#0e192c;--card:#172640;--line:#2b3e5c;--gold:#dfbb32;--muted:#a9b7c6;--green:#126235;--blue:#244594;--red:#8d2529}
+      *{box-sizing:border-box}
+      body{margin:0;padding:28px;background:var(--navy);color:#f8fafc;font-family:Arial,sans-serif}
+      main{max-width:1280px;margin:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+      h1{margin:0 0 8px} p,.feedback,#round-feedback,#deadline-feedback,#reminder-summary,#extra-feedback,#squad-feedback{color:var(--muted)}
+      select,input,textarea{min-height:42px;border:0;border-radius:9px;padding:0 10px;font-family:Arial,sans-serif}
+      textarea{width:100%;min-height:320px;padding:14px;line-height:1.45}
+      .tabs{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}
+      .tab{border:1px solid var(--line);border-radius:999px;padding:12px 18px;color:#f8fafc;background:#111c30;font-weight:700;cursor:pointer}
+      .tab.active{border-color:var(--gold);color:#0b1220;background:var(--gold)}
+      .panel{display:none}.panel.active{display:block}
+      .toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:14px 0 20px}.toolbar span{color:var(--muted)}
+      .game{display:grid;grid-template-columns:1fr 50px 18px 50px 1fr 1.1fr 1.25fr 140px;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+      .feedback{font-size:12px}.round-actions{display:flex;align-items:center;justify-content:flex-end;gap:14px;padding-top:22px;margin-top:8px}
+      .save-round,.primary{border:0;border-radius:14px;padding:15px 24px;background:var(--gold);color:#0b1220;font-weight:800;cursor:pointer}
+      .secondary,.danger{border:0;border-radius:10px;padding:10px 12px;color:#fff;font-weight:700;cursor:pointer}
+      .secondary{background:var(--blue)}.danger{background:var(--red)}
+      .save-round:disabled,.primary:disabled{opacity:.7;cursor:wait}
+      .deadline-row,.person-row,.extra-row{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
+      .deadline-row input{width:100%;background:#e8edf5;color:#0b1220;font-weight:700}
+      .person-row{grid-template-columns:1fr 120px 160px}.person-row button{border:0;border-radius:10px;padding:10px 12px;background:#244594;color:#fff;font-weight:700}
+      .status-pill{display:inline-flex;align-items:center;justify-content:center;width:max-content;border-radius:999px;padding:9px 13px;font-weight:800}
+      .status-ok{background:#126235;color:#b9f0ca}.status-warn{background:#3b2e13;color:#ffd466;border:1px solid #8c681a}.status-empty{background:#321d24;color:#ffb4b4;border:1px solid #74323b}
+      table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-size:12px}
+      .form-grid{display:grid;grid-template-columns:1fr 1fr 220px 180px auto;gap:10px;align-items:end;margin:16px 0 20px}
+      .field{display:grid;gap:6px}.field label{color:var(--muted);font-size:12px;font-weight:700}.field input,.field select{width:100%;background:#e8edf5;color:#0b1220}
+      .squad-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start}.hint{color:var(--muted);font-size:13px}
+      @media(max-width:900px){body{padding:14px}main{padding:18px}.game{grid-template-columns:1fr 48px 18px 48px 1fr}.game select:nth-of-type(3),.game select:nth-of-type(4),.feedback{grid-column:1/-1}.round-actions{align-items:stretch;flex-direction:column}.deadline-row,.person-row,.extra-row,.form-grid,.squad-layout{grid-template-columns:1fr}}
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>⚙️ Admin</h1>
+      <p>Controle do Bolão Brasileirão 2026.</p>
+
+      <nav class="tabs" aria-label="Áreas do admin">
+        <button class="tab active" data-panel="results-panel">Resultados</button>
+        <button class="tab" data-panel="deadlines-panel">Fechamentos</button>
+        <button class="tab" data-panel="extras-panel">Jogos Extras</button>
+        <button class="tab" data-panel="squads-panel">Elencos</button>
+        <button class="tab" data-panel="reminders-panel">Lembrete</button>
+        <button class="tab" data-panel="participants-panel">Participantes</button>
+      </nav>
+
+      <section id="results-panel" class="panel active">
+        <h2>Resultados</h2>
+        <p>Selecione a rodada, preencha os gabaritos e salve tudo no botão final.</p>
+        <div class="toolbar"><label>Rodada</label><select id="result-round"></select><span id="result-count"></span></div>
+        <div id="result-list">Entre como Admin pelo acesso principal.</div>
+      </section>
+
+      <section id="deadlines-panel" class="panel">
+        <h2>Fechamentos</h2>
+        <p>Defina a data e hora limite para cada rodada. Depois usaremos isso para bloquear palpites.</p>
+        <div id="deadline-list"></div>
+        <div class="round-actions"><button id="save-deadlines" class="primary">SALVAR FECHAMENTOS</button><span id="deadline-feedback"></span></div>
+      </section>
+
+      <section id="extras-panel" class="panel">
+        <h2>Jogos Extras / Adiados</h2>
+        <p>Crie partidas avulsas com deadline própria. Elas entram como jogos extras para palpites futuros.</p>
+        <div class="form-grid">
+          <div class="field"><label>Mandante</label><input id="extra-home" placeholder="Ex: Flamengo"></div>
+          <div class="field"><label>Visitante</label><input id="extra-away" placeholder="Ex: Mirassol"></div>
+          <div class="field"><label>Deadline</label><input id="extra-deadline" type="datetime-local"></div>
+          <div class="field"><label>Referência</label><input id="extra-label" placeholder="Ex: Adiado R04"></div>
+          <button id="add-extra" class="primary" type="button">CRIAR JOGO</button>
+        </div>
+        <div id="extra-feedback"></div>
+        <div id="extra-list"></div>
+      </section>
+
+      <section id="squads-panel" class="panel">
+        <h2>Elencos</h2>
+        <p>Edite a lista disponível para o primeiro gol. Use uma linha por atleta, no formato <b>POS • Nome</b>.</p>
+        <div class="squad-layout">
+          <div>
+            <div class="field"><label>Time</label><select id="squad-team"></select></div>
+            <p class="hint">As mudanças ficam salvas no Firebase. O arquivo inicial continua servindo como base.</p>
+            <button id="save-squad" class="primary" type="button">SALVAR ELENCO</button>
+            <p id="squad-feedback"></p>
+          </div>
+          <textarea id="squad-players" spellcheck="false"></textarea>
+        </div>
+      </section>
+
+      <section id="reminders-panel" class="panel">
+        <h2>Lembrete</h2>
+        <p>Veja quem já salvou os palpites da rodada selecionada.</p>
+        <div class="toolbar"><label>Rodada</label><select id="reminder-round"></select><span id="reminder-summary"></span></div>
+        <table><thead><tr><th>Participante</th><th>Status</th></tr></thead><tbody id="reminder-list"></tbody></table>
+      </section>
+
+      <section id="participants-panel" class="panel">
+        <h2>Participantes</h2>
+        <p>Visualize participantes e resete PIN quando alguém precisar criar novamente.</p>
+        <div id="participants-list"></div>
+      </section>
+    </main>
+    <script type="module" src="admin-firestore.js"></script>
+  </body>
+</html>
