@@ -13,7 +13,7 @@ let SQUADS = {};
 let squadsLoadError = null;
 
 try {
-  ({ SQUADS } = await import('./data/squads.js'));
+  ({ SQUADS } = await import('./squads.js'));
 } catch (error) {
   squadsLoadError = error;
 }
@@ -122,7 +122,7 @@ onAuthStateChanged(auth, (user) => {
 
   if (squadsLoadError) {
     console.error(squadsLoadError);
-    list.textContent = 'Arquivo de elencos não encontrado. Confira se data/squads.js foi enviado para o GitHub dentro da pasta data.';
+    list.textContent = 'Arquivo de elencos não encontrado. Confira se squads.js foi enviado para a raiz do GitHub.';
     return;
   }
 
