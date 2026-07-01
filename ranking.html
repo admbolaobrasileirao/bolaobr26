@@ -1,15 +1,90 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Ranking — Bolão 2026</title><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bungee+Inline&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /><link rel="stylesheet" href="ranking.css" /></head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ranking — Bolão 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bungee+Inline&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="ranking.css" />
+  </head>
   <body>
-    <header class="topbar"><a class="brand" href="home.html">BOLÃO <span>2026</span></a><button class="profile" type="button" aria-label="Abrir perfil">A</button></header>
+    <header class="topbar">
+      <a class="brand" href="home.html">BOLÃO <span>2026</span></a>
+      <button class="profile" type="button" aria-label="Abrir perfil">A</button>
+    </header>
+
     <main class="page-content">
-      <section class="ranking-header"><div><p class="eyebrow">A DISPUTA PELO TOPO</p><h1>🏆 Ranking</h1></div><p>Pontos e cravadas definem a classificação.</p></section>
-      <div class="ranking-tabs" role="tablist"><button class="tab is-active" type="button" role="tab" aria-selected="true" data-target="general">GERAL</button><button class="tab" type="button" role="tab" aria-selected="false" data-target="monthly">MENSAL</button></div>
-      <section id="general" class="ranking-panel"><div class="g4-heading"><div><p class="eyebrow">OS MELHORES DO CAMPEONATO</p><h2>G4</h2></div><p>38 rodadas · classificação geral</p></div><div id="g4" class="g4-grid"></div><section class="table-card"><h2>Classificação completa</h2><div class="table-wrap"><table><thead><tr><th>Pos.</th><th>Participante</th><th>Pontos</th><th>Cravadas</th></tr></thead><tbody id="general-table"></tbody></table></div></section></section>
-      <section id="monthly" class="ranking-panel is-hidden"><div class="monthly-head"><div><p class="eyebrow">RANKING DO MÊS</p><h2>Classificação mensal</h2></div><label>Mês <select id="month"><option>Junho</option><option>Maio</option><option>Abril</option><option>Março</option></select></label></div><section class="table-card"><h2 id="month-title">Classificação de junho</h2><p class="table-note">Rodadas iniciadas em junho e jogos atrasados disputados no mês.</p><div class="table-wrap"><table><thead><tr><th>Pos.</th><th>Participante</th><th>Pontos</th><th>Cravadas</th></tr></thead><tbody id="monthly-table"></tbody></table></div></section></section>
+      <section class="ranking-header">
+        <div>
+          <p class="eyebrow">A DISPUTA PELO TOPO</p>
+          <h1>🏆 Ranking</h1>
+        </div>
+        <p>Pontos e cravadas definem a classificação.</p>
+      </section>
+
+      <div class="ranking-tabs" role="tablist">
+        <button class="tab is-active" type="button" role="tab" aria-selected="true" data-target="general">GERAL</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" data-target="monthly">MENSAL</button>
+      </div>
+
+      <section id="general" class="ranking-panel">
+        <div class="g4-heading">
+          <div>
+            <p class="eyebrow">OS MELHORES DO CAMPEONATO</p>
+            <h2>G4</h2>
+          </div>
+          <p>38 rodadas · classificação geral</p>
+        </div>
+        <div id="g4" class="g4-grid"></div>
+
+        <section class="table-card">
+          <h2>Classificação completa</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Pos.</th><th>Participante</th><th>Pontos</th><th>Cravadas</th></tr>
+              </thead>
+              <tbody id="general-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="monthly" class="ranking-panel is-hidden">
+        <div class="monthly-head">
+          <div>
+            <p class="eyebrow">RANKING DO MÊS</p>
+            <h2>Classificação mensal</h2>
+          </div>
+          <label>Mês <select id="month"></select></label>
+        </div>
+
+        <section class="table-card">
+          <h2 id="month-title">Classificação de julho</h2>
+          <p class="table-note">Será ativada quando cadastrarmos os meses oficiais das rodadas/deadlines.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Pos.</th><th>Participante</th><th>Pontos</th><th>Cravadas</th></tr>
+              </thead>
+              <tbody id="monthly-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
     </main>
-    <footer class="bottom-nav" aria-label="Navegação principal"><a href="home.html">🏠<span>Home</span></a><a href="palpites.html">⚽<span>Palpites</span></a><a href="galera.html">👀<span>Galera</span></a><a class="is-current" href="ranking.html">🏆<span>Ranking</span></a><a href="classificacao.html">📊<span>Classificação</span></a><a href="resultados.html">🌎<span>Resultados</span></a></footer>
-    <script src="ranking.js"></script>
+
+    <footer class="bottom-nav" aria-label="Navegação principal">
+      <a href="home.html">🏠<span>Home</span></a>
+      <a href="palpites.html">⚽<span>Palpites</span></a>
+      <a href="galera.html">👀<span>Galera</span></a>
+      <a class="is-current" href="ranking.html">🏆<span>Ranking</span></a>
+      <a href="classificacao.html">📊<span>Classificação</span></a>
+      <a href="resultados.html">🌎<span>Resultados</span></a>
+    </footer>
+
+    <script type="module" src="ranking.js"></script>
   </body>
 </html>
