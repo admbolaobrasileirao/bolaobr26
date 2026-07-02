@@ -12,13 +12,13 @@ const rounds = Array.from({ length: 38 }, (_, index) => index + 1);
 roundSelect.innerHTML = rounds.map((round) => `<option value="${round}">Rodada ${String(round).padStart(2, '0')}</option>`).join('');
 
 function scoreText(homeGoals, awayGoals) {
-  if (homeGoals === undefined || awayGoals === undefined || homeGoals === null || awayGoals === null) return '—';
-  return `${homeGoals}×${awayGoals}`;
+  if (homeGoals === undefined || awayGoals === undefined || homeGoals === null || awayGoals === null) return '-';
+  return `${homeGoals}x${awayGoals}`;
 }
 
 function shortPlayer(player) {
-  if (!player) return '—';
-  return player.split('•').pop().trim();
+  if (!player) return '-';
+  return player.split(/[•]/).pop().trim();
 }
 
 function statusClass(correction) {
@@ -26,6 +26,13 @@ function statusClass(correction) {
   if (correction.status === 'cravada') return 'correct';
   if (correction.status === 'acerto') return 'match';
   return 'miss';
+}
+
+function roundPoints(participant, games, predictions) {
+  return games.reduce((total, game) => {
+    const prediction = predictions.get(`${participant.id}|${game.id}`);
+    return total + (prediction?.correction?.totalPoints || 0);
+  }, 0);
 }
 
 async function getParticipants() {
@@ -86,12 +93,12 @@ function renderClosedRound(round, participants, games, predictions, roundData) {
   const groups = games.map((game) => `
     <th colspan="2" class="game-heading">
       <span>${teamIcon(game.home)}${game.home}</span>
-      <strong>×</strong>
+      <strong>x</strong>
       <span>${teamIcon(game.away)}${game.away}</span>
     </th>
   `).join('');
 
-  const subheaders = games.map(() => '<th>PLACAR</th><th>⚽ 1º GOL</th>').join('');
+  const subheaders = games.map(() => '<th>PLACAR</th><th>1º GOL</th>').join('');
   const official = games.map((game) => {
     const result = game.result || {};
     const officialClass = result.homeGoals === undefined || result.awayGoals === undefined ? 'pending-official' : '';
@@ -99,31 +106,32 @@ function renderClosedRound(round, participants, games, predictions, roundData) {
   }).join('');
 
   const rows = participants.map((participant) => {
+    const points = roundPoints(participant, games, predictions);
     const cells = games.map((game) => {
       const prediction = predictions.get(`${participant.id}|${game.id}`);
-      if (!prediction) return '<td class="prediction muted">—</td><td class="prediction goal muted">—</td>';
+      if (!prediction) return '<td class="prediction muted">-</td><td class="prediction goal muted">-</td>';
       const correction = prediction.correction || {};
       const ball = correction.goalHit ? '<span class="ball" aria-label="Primeiro gol correto">⚽</span>' : '';
       return `<td class="prediction"><span class="score-badge ${statusClass(correction)}">${scoreText(prediction.homeGoals, prediction.awayGoals)}</span></td><td class="prediction goal">${shortPlayer(prediction.firstGoal)}${ball}</td>`;
     }).join('');
-    return `<tr><th scope="row" class="name-cell">${participant.name}</th>${cells}</tr>`;
+    return `<tr><th scope="row" class="name-cell">${participant.name}</th><td class="points-cell">${points}</td>${cells}</tr>`;
   }).join('');
 
-  table.innerHTML = `<thead><tr><th rowspan="2" class="sticky-name">PARTICIPANTE</th>${groups}</tr><tr>${subheaders}</tr></thead><tbody><tr class="official-row"><th scope="row" class="name-cell">OFICIAL</th>${official}</tr>${rows}</tbody>`;
+  table.innerHTML = `<thead><tr><th rowspan="2" class="sticky-name">PARTICIPANTE</th><th rowspan="2" class="sticky-points">PTS</th>${groups}</tr><tr>${subheaders}</tr></thead><tbody><tr class="official-row"><th scope="row" class="name-cell">OFICIAL</th><td class="points-cell">-</td>${official}</tr>${rows}</tbody>`;
 
   const finishedGames = games.filter((game) => game.result && game.result.homeGoals !== undefined && game.result.awayGoals !== undefined).length;
   matrixEyebrow.textContent = `PALPITES DA RODADA ${round}`;
   matrixTitle.textContent = 'Gabarito e palpites da galera';
-  roundMeta.textContent = `${finishedGames}/${games.length} jogos com gabarito · ${participants.length} participantes`;
-  roundStatus.textContent = isDeadlineClosed(roundData) ? '🔒 RODADA FECHADA' : '🟡 GABARITO LANÇADO';
+  roundMeta.textContent = `${finishedGames}/${games.length} jogos com gabarito - ${participants.length} participantes`;
+  roundStatus.textContent = isDeadlineClosed(roundData) ? 'RODADA FECHADA' : 'GABARITO LANÇADO';
 }
 
 function renderBlocked(round, participants, games) {
   table.innerHTML = `<tbody><tr><td class="blocked-message">Palpites da Rodada ${String(round).padStart(2, '0')} ainda não liberados. Eles aparecem aqui após o fechamento da rodada ou após o gabarito ser salvo.</td></tr></tbody>`;
   matrixEyebrow.textContent = `RODADA ${round}`;
   matrixTitle.textContent = 'Aguardando fechamento/gabarito';
-  roundMeta.textContent = `${games.length} jogos · ${participants.length} participantes`;
-  roundStatus.textContent = '🔐 AGUARDANDO FECHAMENTO';
+  roundMeta.textContent = `${games.length} jogos - ${participants.length} participantes`;
+  roundStatus.textContent = 'AGUARDANDO FECHAMENTO';
 }
 
 async function loadRound(round) {

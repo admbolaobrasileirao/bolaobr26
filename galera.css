@@ -418,3 +418,11 @@ thead tr:nth-child(2) th {
     font-size: .67rem;
   }
 }
+
+/* Galera - coluna fixa de pontos da rodada */
+.sticky-name,
+.name-cell{min-width:142px;width:142px;max-width:142px}
+.sticky-points{position:sticky!important;left:142px;z-index:7!important;min-width:54px;width:54px;max-width:54px;text-align:center;background:#121f35!important;color:var(--gold)!important}
+.points-cell{position:sticky;left:142px;z-index:3;min-width:54px;width:54px;max-width:54px;text-align:center;color:var(--gold);font:800 .78rem Inter,Arial,sans-serif;background:#16243b;border-right:1px solid #3d5274}
+.official-row .points-cell{color:#182235;background:var(--gold)}
+@media(max-width:760px){.sticky-name,.name-cell{min-width:112px;width:112px;max-width:112px}.sticky-points,.points-cell{left:112px;min-width:48px;width:48px;max-width:48px}}
