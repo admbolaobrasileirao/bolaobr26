@@ -15,10 +15,15 @@ import {
 
 let SQUADS = {};
 let currentGames = [];
+let tableGames = [];
 
 const resultList = document.querySelector('#result-list');
 const resultRound = document.querySelector('#result-round');
 const resultCount = document.querySelector('#result-count');
+const tableRound = document.querySelector('#table-round');
+const tableCount = document.querySelector('#table-count');
+const tableList = document.querySelector('#table-list');
+const tableFeedback = document.querySelector('#table-feedback');
 const deadlineList = document.querySelector('#deadline-list');
 const reminderRound = document.querySelector('#reminder-round');
 const reminderList = document.querySelector('#reminder-list');
@@ -134,7 +139,96 @@ async function getGames(round) {
   const snap = await getDocs(q);
   const games = [];
   snap.forEach((item) => games.push({ id: item.id, ...item.data() }));
-  return games.sort((a, b) => (a.deadline || '').localeCompare(b.deadline || '') || (a.order || 0) - (b.order || 0));
+  return games.sort((a, b) => (a.order || 0) - (b.order || 0) || (a.kickoff || '').localeCompare(b.kickoff || '') || (a.deadline || '').localeCompare(b.deadline || ''));
+}
+
+function datetimeValue(value) {
+  return value ? String(value).slice(0, 16) : '';
+}
+
+async function loadTableEditor(round) {
+  tableGames = [];
+  tableList.textContent = 'Carregando tabela...';
+  tableFeedback.textContent = '';
+
+  try {
+    tableGames = await getGames(round);
+    tableCount.textContent = `${tableGames.length} jogos`;
+
+    if (!tableGames.length) {
+      tableList.innerHTML = '<p>Nenhum jogo encontrado para esta rodada.</p>';
+      return;
+    }
+
+    tableList.innerHTML = tableGames.map((game, index) => `
+      <div class="table-game-row" data-game-id="${game.id}">
+        <div class="field">
+          <label>Ordem</label>
+          <input class="table-order" type="number" min="1" value="${game.order || index + 1}">
+        </div>
+        <div class="field">
+          <label>Mandante</label>
+          <input class="table-home" value="${game.home || ''}">
+        </div>
+        <div class="field">
+          <label>Visitante</label>
+          <input class="table-away" value="${game.away || ''}">
+        </div>
+        <div class="field">
+          <label>Data e hora do jogo</label>
+          <input class="table-kickoff" type="datetime-local" value="${datetimeValue(game.kickoff)}">
+        </div>
+        <div class="field">
+          <label>Deadline individual</label>
+          <input class="table-deadline" type="datetime-local" value="${datetimeValue(game.deadline)}">
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error(error);
+    tableList.textContent = `Erro ao carregar tabela: ${error.message}`;
+  }
+}
+
+async function saveTableEditor() {
+  const button = document.querySelector('#save-table');
+  const rows = [...document.querySelectorAll('.table-game-row')];
+
+  if (!rows.length) return alert('Nenhum jogo para salvar nesta rodada.');
+
+  button.disabled = true;
+  tableFeedback.textContent = 'Salvando tabela...';
+
+  try {
+    await Promise.all(rows.map((row) => {
+      const game = tableGames.find((item) => item.id === row.dataset.gameId);
+      const order = +row.querySelector('.table-order').value || game?.order || 0;
+      const home = row.querySelector('.table-home').value.trim();
+      const away = row.querySelector('.table-away').value.trim();
+      const kickoff = row.querySelector('.table-kickoff').value || null;
+      const deadline = row.querySelector('.table-deadline').value || null;
+
+      if (!home || !away) throw new Error('Todos os jogos precisam de mandante e visitante.');
+
+      return setDoc(doc(db, 'games', row.dataset.gameId), {
+        order,
+        home,
+        away,
+        kickoff,
+        deadline,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+    }));
+
+    tableFeedback.textContent = 'Tabela salva. Meus Palpites já usará esses dados.';
+    await loadTableEditor(tableRound.value);
+    if (resultRound.value === tableRound.value) await loadResults(resultRound.value);
+  } catch (error) {
+    console.error(error);
+    tableFeedback.textContent = `Erro: ${error.message}`;
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function getParticipants() {
@@ -465,15 +559,19 @@ function setupSquads() {
 async function bootAdmin() {
   SQUADS = await getSquads();
   fillRoundSelect(resultRound, 19, true);
+  fillRoundSelect(tableRound, 19, true);
   fillRoundSelect(reminderRound, 19, true);
   resultRound.onchange = () => loadResults(resultRound.value);
+  tableRound.onchange = () => loadTableEditor(tableRound.value);
   reminderRound.onchange = () => loadReminders(reminderRound.value);
+  document.querySelector('#save-table').onclick = saveTableEditor;
   document.querySelector('#save-deadlines').onclick = saveDeadlines;
   document.querySelector('#add-extra').onclick = addExtraGame;
   setupSquads();
 
   await Promise.all([
     loadResults(resultRound.value),
+    loadTableEditor(tableRound.value),
     loadDeadlines(),
     loadReminders(reminderRound.value),
     loadParticipants(),
