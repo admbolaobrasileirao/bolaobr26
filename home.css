@@ -10,3 +10,14 @@ body { min-width:320px; margin:0; padding-bottom:88px; color:var(--text); font-f
 .bottom-nav{position:fixed;z-index:5;right:0;bottom:0;left:0;display:flex;justify-content:center;gap:5px;padding:10px 14px max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:rgba(18,31,53,.97);backdrop-filter:blur(12px)}.bottom-nav a{display:grid;justify-items:center;gap:4px;min-width:90px;padding:7px 9px;border-radius:10px;color:var(--muted);font-size:1.12rem;text-decoration:none}.bottom-nav span{font:400 .62rem "Archivo Black",sans-serif}.bottom-nav a.is-current{color:var(--gold);background:#22334f}
 @media(max-width:830px){.topbar{padding:0 16px}.welcome{align-items:start;gap:12px;flex-direction:column}.welcome>p{line-height:1.45}.page-content{padding-top:25px}.bottom-nav{justify-content:flex-start;overflow-x:auto}.bottom-nav::-webkit-scrollbar{display:none}.bottom-nav a{min-width:76px}}
 @media(max-width:620px){.topbar{min-height:62px}.brand{font-size:.85rem}.leaders,.results-grid{grid-template-columns:1fr}.leaders{gap:12px}.leader-content{padding-bottom:20px}.countdown-card{padding:22px 12px}.results-card{padding:21px 16px 8px}.results-grid{gap:0}.result{grid-template-columns:minmax(0,1fr)auto minmax(0,1fr)73px;font-size:.78rem;gap:6px}.result-header{grid-template-columns:1fr 73px}.result em{padding-left:7px;font-size:.72rem}.result-list:last-child .result-header{border-top:1px solid var(--line)}.prediction-link{width:100%;max-width:330px}.bottom-nav{padding-right:10px;padding-left:10px}.bottom-nav a{min-width:67px;padding:6px 5px}.bottom-nav span{font-size:.55rem}}
+
+/* Home - resultados compactos */
+.result-header{grid-template-columns:minmax(0,1fr) minmax(120px,.46fr)}
+.result{grid-template-columns:minmax(0,1fr)44px minmax(0,1fr)minmax(120px,.46fr);gap:8px}
+.result .team-side{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result .home-side{justify-content:flex-start;text-align:left}
+.result .away-side{justify-content:flex-end;text-align:right}
+.result .team-icon{flex:0 0 auto;margin:0!important}
+.result b{text-align:center;font-size:.78rem}
+.result em{min-width:0;color:#a9c8ff}
+@media(max-width:620px){.result-header{grid-template-columns:minmax(0,1fr)94px}.result{grid-template-columns:minmax(0,1fr)38px minmax(0,1fr)94px;gap:5px}.result em{font-size:.68rem;padding-left:6px}.result b{font-size:.7rem}.result .team-side{gap:3px}}

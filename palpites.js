@@ -63,7 +63,7 @@ async function getRoundDeadline(round) {
 }
 
 function isGameLocked(game) {
-  const deadline = game.extra ? game.deadline : currentDeadline;
+  const deadline = game.deadline || currentDeadline;
   return !!deadline && new Date(deadline) <= new Date();
 }
 
@@ -104,7 +104,7 @@ async function getGames(round) {
   const snap = await getDocs(q);
   const games = [];
   snap.forEach((item) => games.push({ id: item.id, ...item.data() }));
-  return games.sort((a, b) => (a.deadline || '').localeCompare(b.deadline || '') || (a.order || 0) - (b.order || 0));
+  return games.sort((a, b) => (a.order || 0) - (b.order || 0) || (a.kickoff || '').localeCompare(b.kickoff || '') || (a.deadline || '').localeCompare(b.deadline || ''));
 }
 
 async function getPredictions(round) {
@@ -123,6 +123,19 @@ function syncPlayerSelect(row, selectedPlayer = '') {
   playerSelect.innerHTML = playerOptions(team, selectedPlayer);
 }
 
+function formatKickoff(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
 function renderGames(round) {
   const label = round === 'extras' ? 'EXTRAS / ATRASADOS' : `RODADA ${round}`;
   roundEyebrow.textContent = label;
@@ -139,10 +152,12 @@ function renderGames(round) {
     const prediction = currentPredictions.get(game.id) || {};
     const selectedTeam = prediction.firstGoalTeam || '';
     const locked = isGameLocked(game);
+    const kickoff = formatKickoff(game.kickoff);
     const lockText = locked ? '<small class="field-label">🔒 Fechado</small>' : '';
 
     return `
       <article class="game" data-game-id="${game.id}" data-locked="${locked}">
+        ${kickoff ? `<small class="game-kickoff">🗓️ ${kickoff}</small>` : ''}
         <div class="score-prediction">
           <span class="team home">${game.home}${teamIcon(game.home)}</span>
           <select class="home-goals" ${locked ? 'disabled' : ''} aria-label="Gols do ${game.home}">${numberOptions(prediction.homeGoals)}</select>

@@ -1,3 +1,55 @@
-const teams=[['Palmeiras',41,18,12,5,1,30,17,'WWDWW'],['Flamengo',38,18,11,5,2,33,15,'WDWWW'],['Cruzeiro',35,18,10,5,3,27,11,'WLWDW'],['Bragantino',33,18,9,6,3,25,8,'DWWDW'],['Bahia',31,18,8,7,3,24,6,'WDWDD'],['Botafogo',29,18,8,5,5,26,4,'WLWDW'],['Fluminense',28,18,8,4,6,22,3,'DWLWW'],['São Paulo',27,18,7,6,5,21,2,'WDDWL'],['Atlético-MG',26,18,7,5,6,24,1,'LWDWD'],['Corinthians',25,18,7,4,7,20,0,'WWLLD'],['Grêmio',24,18,6,6,6,19,-1,'DLWDW'],['Vasco',22,18,6,4,8,20,-4,'LWLDL'],['Ceará',21,18,5,6,7,17,-5,'DDWLW'],['Internacional',20,18,5,5,8,19,-6,'LLDWW'],['Santos',19,18,5,4,9,18,-9,'WLLDL'],['Vitória',18,18,4,6,8,16,-10,'DLDWL'],['Fortaleza',17,18,4,5,9,15,-12,'LLDLD'],['Juventude',16,18,4,4,10,14,-15,'WLLLD'],['Sport',14,18,3,5,10,13,-16,'LDLLD'],['Mirassol',12,18,2,6,10,12,-19,'DLLDL']];
-const standings = [...teams].sort((a, b) => b[1] - a[1] || b[3] - a[3] || b[7] - a[7] || b[6] - a[6]);
-document.querySelector('#standings').innerHTML=standings.map((team,index)=>{const recent=team[8].split('').map(result=>`<i class="${result==='W'?'win':result==='D'?'draw':'loss'}"></i>`).join('');return `<tr><td><span class="position">${index+1}</span><span class="team">${teamIcon(team[0])}${team[0]}</span></td><td>${team[1]}</td><td>${team[2]}</td><td>${team[3]}</td><td>${team[4]}</td><td>${team[5]}</td><td>${team[6]}</td><td>${team[7]>0?'+':''}${team[7]}</td><td><span class="form">${recent}</span></td></tr>`}).join('');
+const STANDINGS = [
+  { name: 'Palmeiras', points: 41, games: 18, wins: 12, draws: 5, losses: 1, goalsFor: 30, goalDifference: 17, recent: 'EEVVV' },
+  { name: 'Flamengo', points: 34, games: 17, wins: 10, draws: 4, losses: 3, goalsFor: 31, goalDifference: 15, recent: 'EVDVV' },
+  { name: 'Fluminense', points: 31, games: 18, wins: 9, draws: 4, losses: 5, goalsFor: 28, goalDifference: 5, recent: 'DEDVE' },
+  { name: 'Athletico', points: 30, games: 18, wins: 9, draws: 3, losses: 6, goalsFor: 24, goalDifference: 6, recent: 'DEDVV' },
+  { name: 'Bragantino', points: 29, games: 18, wins: 9, draws: 2, losses: 7, goalsFor: 25, goalDifference: 6, recent: 'VDVVV' },
+  { name: 'Bahia', points: 26, games: 17, wins: 7, draws: 5, losses: 5, goalsFor: 25, goalDifference: 2, recent: 'DEDVV' },
+  { name: 'Coritiba', points: 26, games: 18, wins: 7, draws: 5, losses: 6, goalsFor: 24, goalDifference: 0, recent: 'DEVDD' },
+  { name: 'São Paulo', points: 25, games: 18, wins: 7, draws: 4, losses: 7, goalsFor: 23, goalDifference: 3, recent: 'EDDED' },
+  { name: 'Atlético-MG', points: 24, games: 18, wins: 7, draws: 3, losses: 8, goalsFor: 22, goalDifference: -1, recent: 'VDDDV' },
+  { name: 'Corinthians', points: 24, games: 18, wins: 6, draws: 6, losses: 6, goalsFor: 18, goalDifference: -1, recent: 'DVDVV' },
+  { name: 'Cruzeiro', points: 24, games: 18, wins: 6, draws: 6, losses: 6, goalsFor: 24, goalDifference: -4, recent: 'DEVVE' },
+  { name: 'Botafogo', points: 22, games: 17, wins: 6, draws: 4, losses: 7, goalsFor: 31, goalDifference: 0, recent: 'DEVED' },
+  { name: 'Vitória', points: 22, games: 17, wins: 6, draws: 4, losses: 7, goalsFor: 21, goalDifference: -4, recent: 'VEDVD' },
+  { name: 'Internacional', points: 21, games: 18, wins: 5, draws: 6, losses: 7, goalsFor: 21, goalDifference: -1, recent: 'VEDD' },
+  { name: 'Santos', points: 21, games: 18, wins: 5, draws: 6, losses: 7, goalsFor: 26, goalDifference: -3, recent: 'EVDDV' },
+  { name: 'Grêmio', points: 21, games: 18, wins: 5, draws: 6, losses: 7, goalsFor: 20, goalDifference: -3, recent: 'EDED' },
+  { name: 'Vasco', points: 20, games: 18, wins: 5, draws: 5, losses: 8, goalsFor: 22, goalDifference: -7, recent: 'EVDDD' },
+  { name: 'Remo', points: 18, games: 18, wins: 4, draws: 6, losses: 8, goalsFor: 21, goalDifference: -8, recent: 'VEDVV' },
+  { name: 'Mirassol', points: 16, games: 17, wins: 4, draws: 4, losses: 9, goalsFor: 18, goalDifference: -6, recent: 'VEDVD' },
+  { name: 'Chapecoense', points: 9, games: 17, wins: 1, draws: 6, losses: 10, goalsFor: 17, goalDifference: -16, recent: 'DEDDD' },
+];
+
+const tbody = document.querySelector('#standings');
+const tableStatus = document.querySelector('#table-status');
+
+function recentDots(sequence) {
+  return sequence.split('').map((result) => {
+    const cssClass = result === 'V' ? 'win' : result === 'E' ? 'draw' : 'loss';
+    const title = result === 'V' ? 'Vitória' : result === 'E' ? 'Empate' : 'Derrota';
+    return `<i class="${cssClass}" title="${title}"></i>`;
+  }).join('');
+}
+
+function render(data) {
+  tbody.innerHTML = data.map((team, index) => `
+    <tr>
+      <td>
+        <span class="position">${index + 1}</span>
+        <span class="team">${teamIcon(team.name)}${team.name}</span>
+      </td>
+      <td>${team.points}</td>
+      <td>${team.games}</td>
+      <td>${team.wins}</td>
+      <td>${team.draws}</td>
+      <td>${team.losses}</td>
+      <td>${team.goalsFor}</td>
+      <td>${team.goalDifference > 0 ? '+' : ''}${team.goalDifference}</td>
+      <td><span class="form">${recentDots(team.recent)}</span></td>
+    </tr>
+  `).join('');
+}
+
+render(STANDINGS);
+if (tableStatus) tableStatus.textContent = 'Tabela atualizada até a Rodada 18';

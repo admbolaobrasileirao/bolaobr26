@@ -1,16 +1,16 @@
-import { db } from './firebase-config.js';
+﻿import { db } from './firebase-config.js';
 import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
 
 const participantName = localStorage.getItem('bolaoParticipantName');
-document.querySelector('#welcome-title').innerHTML = `Olá, ${participantName || 'craque'}! <span>👋</span>`;
+document.querySelector('#welcome-title').innerHTML = `OlÃ¡, ${participantName || 'craque'}! <span>ðŸ‘‹</span>`;
 document.querySelector('#profile').textContent = participantName?.slice(0, 1) || '?';
 
 function scoreText(homeGoals, awayGoals) {
-  return `${homeGoals} × ${awayGoals}`;
+  return `${homeGoals} Ã— ${awayGoals}`;
 }
 
 function shortPlayer(player) {
-  return player ? player.split('•').pop().trim() : '—';
+  return player ? player.split('â€¢').pop().trim() : 'â€”';
 }
 
 async function getParticipantsMap() {
@@ -39,15 +39,15 @@ async function loadLeaders() {
     const leader = ranking[0];
 
     if (!leader || leader.points === 0) {
-      generalBox.innerHTML = '<p>Aguardando gabaritos</p><h2>—</h2><strong>0</strong><small>pts · 🎯 0 cravadas</small>';
+      generalBox.innerHTML = '<p>Aguardando gabaritos</p><h2>â€”</h2><strong>0</strong><small>pts Â· ðŸŽ¯ 0 cravadas</small>';
     } else {
-      generalBox.innerHTML = `<p>Na liderança do campeonato</p><h2>🥇 ${leader.name}</h2><strong>${leader.points}</strong><small>pts · 🎯 ${leader.cravadas} cravadas</small>`;
+      generalBox.innerHTML = `<p>Na lideranÃ§a do campeonato</p><h2>ðŸ¥‡ ${leader.name}</h2><strong>${leader.points}</strong><small>pts Â· ðŸŽ¯ ${leader.cravadas} cravadas</small>`;
     }
 
-    monthlyBox.innerHTML = '<p>Mensal será ativado com as deadlines</p><h2>—</h2><strong>0</strong><small>pts · 🎯 0 cravadas</small>';
+    monthlyBox.innerHTML = '<p>Mensal serÃ¡ ativado com as deadlines</p><h2>â€”</h2><strong>0</strong><small>pts Â· ðŸŽ¯ 0 cravadas</small>';
   } catch (error) {
     console.error(error);
-    generalBox.innerHTML = '<p>Erro ao carregar líder</p>';
+    generalBox.innerHTML = '<p>Erro ao carregar lÃ­der</p>';
     monthlyBox.innerHTML = '<p>Erro ao carregar mensal</p>';
   }
 }
@@ -129,16 +129,16 @@ async function loadLatestResults() {
       <div class="result-header"><span>PARTIDA</span><span>⚽ GOL</span></div>
       ${column.map((game) => `
         <div class="result">
-          <span>${teamIcon(game.home)}${game.home}</span>
+          <span class="team-side home-side">${teamIcon(game.home)}${game.home}</span>
           <b>${scoreText(game.result.homeGoals, game.result.awayGoals)}</b>
-          <span>${teamIcon(game.away)}${game.away}</span>
+          <span class="team-side away-side">${game.away}${teamIcon(game.away)}</span>
           <em>${shortPlayer(game.result.firstGoalPlayer)}</em>
         </div>
       `).join('')}
     </div>
   `).join('');
 }
-
 loadLeaders();
 loadDeadline();
 loadLatestResults();
+

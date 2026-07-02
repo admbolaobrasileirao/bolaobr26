@@ -24,6 +24,8 @@
       .secondary{background:var(--blue)}.danger{background:var(--red)}
       .save-round:disabled,.primary:disabled{opacity:.7;cursor:wait}
       .deadline-row,.person-row,.extra-row{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
+      .table-game-row{display:grid;grid-template-columns:74px 1fr 1fr 210px 210px;gap:10px;align-items:end;padding:14px 0;border-bottom:1px solid var(--line)}
+      .table-game-row .field input{background:#e8edf5;color:#0b1220}
       .deadline-row input{width:100%;background:#e8edf5;color:#0b1220;font-weight:700}
       .person-row{grid-template-columns:1fr 120px 160px}.person-row button{border:0;border-radius:10px;padding:10px 12px;background:#244594;color:#fff;font-weight:700}
       .status-pill{display:inline-flex;align-items:center;justify-content:center;width:max-content;border-radius:999px;padding:9px 13px;font-weight:800}
@@ -32,7 +34,7 @@
       .form-grid{display:grid;grid-template-columns:1fr 1fr 220px 180px auto;gap:10px;align-items:end;margin:16px 0 20px}
       .field{display:grid;gap:6px}.field label{color:var(--muted);font-size:12px;font-weight:700}.field input,.field select{width:100%;background:#e8edf5;color:#0b1220}
       .squad-layout{display:grid;grid-template-columns:260px 1fr;gap:16px;align-items:start}.hint{color:var(--muted);font-size:13px}
-      @media(max-width:900px){body{padding:14px}main{padding:18px}.game{grid-template-columns:1fr 48px 18px 48px 1fr}.game select:nth-of-type(3),.game select:nth-of-type(4),.feedback{grid-column:1/-1}.round-actions{align-items:stretch;flex-direction:column}.deadline-row,.person-row,.extra-row,.form-grid,.squad-layout{grid-template-columns:1fr}}
+      @media(max-width:900px){body{padding:14px}main{padding:18px}.game{grid-template-columns:1fr 48px 18px 48px 1fr}.game select:nth-of-type(3),.game select:nth-of-type(4),.feedback{grid-column:1/-1}.round-actions{align-items:stretch;flex-direction:column}.deadline-row,.person-row,.extra-row,.form-grid,.squad-layout,.table-game-row{grid-template-columns:1fr}}
     </style>
   </head>
   <body>
@@ -42,6 +44,7 @@
 
       <nav class="tabs" aria-label="Áreas do admin">
         <button class="tab active" data-panel="results-panel">Resultados</button>
+        <button class="tab" data-panel="table-panel">Tabela</button>
         <button class="tab" data-panel="deadlines-panel">Fechamentos</button>
         <button class="tab" data-panel="extras-panel">Jogos Extras</button>
         <button class="tab" data-panel="squads-panel">Elencos</button>
@@ -54,6 +57,14 @@
         <p>Selecione a rodada, preencha os gabaritos e salve tudo no botão final.</p>
         <div class="toolbar"><label>Rodada</label><select id="result-round"></select><span id="result-count"></span></div>
         <div id="result-list">Entre como Admin pelo acesso principal.</div>
+      </section>
+
+      <section id="table-panel" class="panel">
+        <h2>Tabela</h2>
+        <p>Edite os confrontos das rodadas futuras jogo por jogo. As alteraÃ§Ãµes aparecem para os participantes em Meus Palpites.</p>
+        <div class="toolbar"><label>Rodada</label><select id="table-round"></select><span id="table-count"></span></div>
+        <div id="table-list">Entre como Admin pelo acesso principal.</div>
+        <div class="round-actions"><button id="save-table" class="primary" type="button">SALVAR TABELA</button><span id="table-feedback"></span></div>
       </section>
 
       <section id="deadlines-panel" class="panel">
