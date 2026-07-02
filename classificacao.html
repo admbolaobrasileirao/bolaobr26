@@ -1,9 +1,67 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Classificação — Bolão 2026</title><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bungee+Inline&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /><link rel="stylesheet" href="classificacao.css" /></head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Classificação — Bolão 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bungee+Inline&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="classificacao.css" />
+  </head>
   <body>
-    <header class="topbar"><a class="brand" href="home.html">BOLÃO <span>2026</span></a><button class="profile" type="button" aria-label="Abrir perfil">A</button></header>
-    <main class="page-content"><section class="classification-header"><div><p class="eyebrow">CAMPEONATO BRASILEIRO</p><h1>📊 Classificação</h1></div><p>Atualizada a partir dos gabaritos confirmados.</p></section><section class="table-card"><div class="table-title"><div><p class="eyebrow">TABELA</p><h2>Classificação geral</h2></div><p>Dados demonstrativos</p></div><div class="table-wrap"><table><thead><tr><th>Times</th><th>Pts</th><th>Jgs</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>SG</th><th>Recente</th></tr></thead><tbody id="standings"></tbody></table></div><p class="form-legend"><span class="win">●</span> Vitória <span class="draw">●</span> Empate <span class="loss">●</span> Derrota</p></section></main>
-    <footer class="bottom-nav" aria-label="Navegação principal"><a href="home.html">🏠<span>Home</span></a><a href="palpites.html">⚽<span>Palpites</span></a><a href="galera.html">👀<span>Galera</span></a><a href="ranking.html">🏆<span>Ranking</span></a><a class="is-current" href="classificacao.html">📊<span>Classificação</span></a><a href="resultados.html">🌎<span>Resultados</span></a></footer><script src="team-assets.js"></script><script src="classificacao.js"></script>
+    <header class="topbar">
+      <a class="brand" href="home.html">BOLÃO <span>2026</span></a>
+      <button class="profile" type="button" aria-label="Abrir perfil">A</button>
+    </header>
+
+    <main class="page-content">
+      <section class="classification-header">
+        <div>
+          <p class="eyebrow">CAMPEONATO BRASILEIRO</p>
+          <h1>📊 Classificação</h1>
+        </div>
+        <p>Atualizada a partir dos gabaritos confirmados.</p>
+      </section>
+
+      <section class="table-card">
+        <div class="table-title">
+          <div>
+            <p class="eyebrow">TABELA</p>
+            <h2>Classificação geral</h2>
+          </div>
+          <p id="table-status">Carregando dados...</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Times</th><th>Pts</th><th>Jgs</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>SG</th><th>Recente</th>
+              </tr>
+            </thead>
+            <tbody id="standings"></tbody>
+          </table>
+        </div>
+
+        <p class="form-legend">
+          <span class="win">●</span> Vitória
+          <span class="draw">●</span> Empate
+          <span class="loss">●</span> Derrota
+        </p>
+      </section>
+    </main>
+
+    <footer class="bottom-nav" aria-label="Navegação principal">
+      <a href="home.html">🏠<span>Home</span></a>
+      <a href="palpites.html">⚽<span>Palpites</span></a>
+      <a href="galera.html">👀<span>Galera</span></a>
+      <a href="ranking.html">🏆<span>Ranking</span></a>
+      <a class="is-current" href="classificacao.html">📊<span>Classificação</span></a>
+      <a href="resultados.html">🌎<span>Resultados</span></a>
+    </footer>
+
+    <script src="team-assets.js"></script>
+    <script type="module" src="classificacao.js"></script>
   </body>
 </html>
