@@ -16,10 +16,18 @@ import {
 let SQUADS = {};
 let currentGames = [];
 let tableGames = [];
+let goalGames = [];
+let goalPredictions = [];
+let goalParticipants = new Map();
 
 const resultList = document.querySelector('#result-list');
 const resultRound = document.querySelector('#result-round');
 const resultCount = document.querySelector('#result-count');
+const goalRound = document.querySelector('#goal-round');
+const goalGame = document.querySelector('#goal-game');
+const goalSummary = document.querySelector('#goal-summary');
+const goalList = document.querySelector('#goal-list');
+const goalFeedback = document.querySelector('#goal-feedback');
 const tableRound = document.querySelector('#table-round');
 const tableCount = document.querySelector('#table-count');
 const tableList = document.querySelector('#table-list');
@@ -61,7 +69,22 @@ const scores = (value) => `
   </select>
 `;
 
-const cleanPlayer = (value = '') => value.split('•').pop().trim().toLowerCase();
+function normalizePlayerName(value = '') {
+  const clean = value
+    .split('•')
+    .pop()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+  if (/\bka[yi][sz]er\b/.test(clean) || clean.includes('renato kayzer')) return 'renato kayzer';
+  return clean;
+}
+
+const cleanPlayer = normalizePlayerName;
 
 const outcome = (homeGoals, awayGoals) => {
   if (homeGoals > awayGoals) return 'home';
@@ -236,6 +259,124 @@ async function getParticipants() {
   const participants = [];
   snap.forEach((item) => participants.push({ id: item.id, ...item.data() }));
   return participants.sort((a, b) => (a.order || 999) - (b.order || 999));
+}
+
+async function loadGoalGames(round) {
+  goalFeedback.textContent = '';
+  goalList.textContent = 'Carregando jogos...';
+
+  try {
+    goalGames = await getGames(round);
+    goalGame.innerHTML = goalGames.map((game) => `
+      <option value="${game.id}">${String(game.order || '').padStart(2, '0')} · ${game.home} x ${game.away}</option>
+    `).join('');
+
+    if (!goalGames.length) {
+      goalSummary.textContent = 'Nenhum jogo encontrado';
+      goalList.innerHTML = '<p>Nenhum jogo encontrado nesta rodada.</p>';
+      return;
+    }
+
+    await loadGoalAudit(goalGame.value);
+  } catch (error) {
+    console.error(error);
+    goalList.textContent = `Erro ao carregar jogos: ${error.message}`;
+  }
+}
+
+async function loadGoalAudit(gameId = goalGame.value) {
+  goalFeedback.textContent = '';
+  goalList.textContent = 'Carregando palpites...';
+  const game = goalGames.find((item) => item.id === gameId);
+
+  if (!game) {
+    goalList.innerHTML = '<p>Selecione um jogo.</p>';
+    return;
+  }
+
+  try {
+    const [participants, snap] = await Promise.all([
+      getParticipants(),
+      getDocs(query(collection(db, 'predictions'), where('game', '==', game.id))),
+    ]);
+
+    goalParticipants = new Map(participants.map((participant) => [participant.id, participant]));
+    goalPredictions = [];
+    snap.forEach((item) => goalPredictions.push({ id: item.id, ...item.data() }));
+    goalPredictions.sort((a, b) => (goalParticipants.get(a.participant)?.order || 999) - (goalParticipants.get(b.participant)?.order || 999));
+
+    const officialGoal = game.result?.firstGoalPlayer || 'Gabarito sem jogador do 1º gol';
+    goalSummary.textContent = `${game.home} x ${game.away} · Oficial: ${officialGoal}`;
+
+    if (!goalPredictions.length) {
+      goalList.innerHTML = '<p>Nenhum palpite encontrado para este jogo.</p>';
+      return;
+    }
+
+    goalList.innerHTML = goalPredictions.map((prediction) => {
+      const participant = goalParticipants.get(prediction.participant);
+      const correction = prediction.correction || {};
+      const checked = correction.goalHit ? 'checked' : '';
+      const points = correction.goalHit ? '+5' : '0';
+      return `
+        <label class="goal-row" data-prediction-id="${prediction.id}">
+          <input class="goal-hit" type="checkbox" ${checked}>
+          <strong>${participant?.name || prediction.participant}</strong>
+          <small>${prediction.firstGoal || '—'}</small>
+          <span>${points} pts</span>
+        </label>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error(error);
+    goalList.textContent = `Erro ao carregar palpites: ${error.message}`;
+  }
+}
+
+function correctionWithManualGoal(prediction, goalHit) {
+  const correction = prediction.correction || {};
+  const scorePoints = correction.scorePoints || 0;
+
+  return {
+    ...correction,
+    scorePoints,
+    goalHit,
+    goalPoints: goalHit ? 5 : 0,
+    totalPoints: scorePoints + (goalHit ? 5 : 0),
+    corrected: true,
+    manualGoal: true,
+    manualGoalAt: new Date().toISOString(),
+  };
+}
+
+async function saveManualGoals() {
+  const rows = [...document.querySelectorAll('.goal-row')];
+  if (!rows.length) return alert('Nenhum palpite para salvar.');
+
+  const button = document.querySelector('#save-goals');
+  button.disabled = true;
+  goalFeedback.textContent = 'Salvando acertos de gol...';
+
+  try {
+    const batch = writeBatch(db);
+    rows.forEach((row) => {
+      const prediction = goalPredictions.find((item) => item.id === row.dataset.predictionId);
+      if (!prediction) return;
+      const goalHit = row.querySelector('.goal-hit').checked;
+      batch.update(doc(db, 'predictions', prediction.id), {
+        correction: correctionWithManualGoal(prediction, goalHit),
+      });
+    });
+
+    await batch.commit();
+    goalFeedback.textContent = 'Acertos de gol salvos. Ranking e Galera serão atualizados.';
+    await loadGoalAudit(goalGame.value);
+  } catch (error) {
+    console.error(error);
+    goalFeedback.textContent = `Erro: ${error.message}`;
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function correctGame(game, result) {
@@ -559,11 +700,15 @@ function setupSquads() {
 async function bootAdmin() {
   SQUADS = await getSquads();
   fillRoundSelect(resultRound, 19, true);
+  fillRoundSelect(goalRound, 1, true);
   fillRoundSelect(tableRound, 19, true);
   fillRoundSelect(reminderRound, 19, true);
   resultRound.onchange = () => loadResults(resultRound.value);
+  goalRound.onchange = () => loadGoalGames(goalRound.value);
+  goalGame.onchange = () => loadGoalAudit(goalGame.value);
   tableRound.onchange = () => loadTableEditor(tableRound.value);
   reminderRound.onchange = () => loadReminders(reminderRound.value);
+  document.querySelector('#save-goals').onclick = saveManualGoals;
   document.querySelector('#save-table').onclick = saveTableEditor;
   document.querySelector('#save-deadlines').onclick = saveDeadlines;
   document.querySelector('#add-extra').onclick = addExtraGame;
@@ -571,6 +716,7 @@ async function bootAdmin() {
 
   await Promise.all([
     loadResults(resultRound.value),
+    loadGoalGames(goalRound.value),
     loadTableEditor(tableRound.value),
     loadDeadlines(),
     loadReminders(reminderRound.value),

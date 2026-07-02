@@ -21,3 +21,15 @@ body { min-width:320px; margin:0; padding-bottom:88px; color:var(--text); font-f
 .result b{text-align:center;font-size:.78rem}
 .result em{min-width:0;color:#a9c8ff}
 @media(max-width:620px){.result-header{grid-template-columns:minmax(0,1fr)94px}.result{grid-template-columns:minmax(0,1fr)38px minmax(0,1fr)94px;gap:5px}.result em{font-size:.68rem;padding-left:6px}.result b{font-size:.7rem}.result .team-side{gap:3px}}
+
+/* Ajuste final Home - placar compacto */
+.results-grid{gap:22px}
+.result-header{grid-template-columns:minmax(0,1fr) minmax(150px,.6fr)!important;gap:7px!important}
+.result{grid-template-columns:minmax(0,.9fr)34px minmax(0,.9fr)minmax(150px,.62fr)!important;gap:5px!important;min-height:43px!important}
+.result .team-side{gap:3px!important;font-size:.82rem!important;font-weight:700!important}
+.result .team-icon{width:21px!important;height:21px!important;margin:0 3px!important}
+.result .home-side{justify-content:flex-start!important}
+.result .away-side{justify-content:flex-end!important}
+.result b{font-size:.72rem!important;letter-spacing:-.04em!important;text-align:center!important;white-space:nowrap!important}
+.result em{padding-left:8px!important;font-size:.78rem!important;color:#a9c8ff!important}
+@media(max-width:620px){.result-header{grid-template-columns:minmax(0,1fr)108px!important}.result{grid-template-columns:minmax(0,.9fr)30px minmax(0,.9fr)108px!important;gap:4px!important}.result .team-icon{width:18px!important;height:18px!important}.result .team-side{font-size:.68rem!important;gap:2px!important}.result b{font-size:.64rem!important}.result em{font-size:.66rem!important;padding-left:5px!important}}

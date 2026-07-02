@@ -6,7 +6,7 @@ document.querySelector('#welcome-title').innerHTML = `OlÃ¡, ${participantName 
 document.querySelector('#profile').textContent = participantName?.slice(0, 1) || '?';
 
 function scoreText(homeGoals, awayGoals) {
-  return `${homeGoals} Ã— ${awayGoals}`;
+  return `${homeGoals} x ${awayGoals}`;
 }
 
 function shortPlayer(player) {
